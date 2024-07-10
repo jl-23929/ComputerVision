@@ -6,27 +6,28 @@ import numpy as np
 lower_blue = np.array([60, 35, 140])
 upper_blue = np.array([180, 255, 255])
 
-lowerYellow = np.array([10, 90, 90])
-upperYellow = np.array([40, 255, 255])
+lowerYellow = np.array([30, 40, 40])
+upperYellow = np.array([60, 255, 255])
 
 # Open video capture
-capture = cv.VideoCapture(r"C:\Users\james\OneDrive\Documents\GitHub\ComputerVision\IMG_0625.MP4")
-
+capture = cv.VideoCapture(r"C:\Users\james680384\Documents\GitHub\ComputerVision\IMG_0625.mov")
 
 
 while True:
     isTrue, frame = capture.read()
 
+    resizedFrame = cv.resize(frame, (640, 480), interpolation=cv.INTER_AREA)
+
     # Convert frame to HSV
-    hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
+    hsv = cv.cvtColor(resizedFrame, cv.COLOR_BGR2HSV)
     
     # Apply yellow mask
     yellowMask = cv.inRange(hsv, lowerYellow, upperYellow)
-    yellowResult = cv.bitwise_and(frame, frame, mask=yellowMask)
+    yellowResult = cv.bitwise_and(resizedFrame, resizedFrame, mask=yellowMask)
 
     # Apply blue mask
     blueMask = cv.inRange(hsv, lower_blue, upper_blue)
-    blueResult = cv.bitwise_and(frame, frame, mask=blueMask)
+    blueResult = cv.bitwise_and(resizedFrame, resizedFrame, mask=blueMask)
     
     finalResult = yellowResult + blueResult
 
