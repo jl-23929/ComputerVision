@@ -1,54 +1,46 @@
 from __future__ import print_function
 import cv2 as cv
-import argparse
 import numpy as np
 
-max_lowThreshold = 100
-window_name = 'Edge Map'
-title_trackbar = 'Min Threshold:'
-ratio = 3
-kernel_size = 3
+# Define HSV ranges for blue and yellow
+lower_blue = np.array([60, 35, 140])
+upper_blue = np.array([180, 255, 255])
 
-lower_blue = np.array([60, 35, 140]) 
-upper_blue = np.array([180, 255, 255]) 
+lowerYellow = np.array([10, 90, 90])
+upperYellow = np.array([40, 255, 255])
 
-lowerYellow = np.array([20, 100, 100])
-upperYellow = np.array([30, 255, 255])
-
-
+# Open video capture
 capture = cv.VideoCapture(r"C:\Users\james\OneDrive\Documents\GitHub\ComputerVision\IMG_0625.MP4")
 
-def CannyThreshold(val):
-    low_threshold = val
-    img_blur = cv.blur(hsv, (1,1))
-    detected_edges = cv.Canny(img_blur, low_threshold, low_threshold * ratio, kernel_size)
-    mask = detected_edges != 0
-    dst = frame * (mask[:, :, None].astype(frame.dtype))
-    cv.imshow(window_name, dst)
 
-cv.namedWindow(window_name)
-cv.createTrackbar(title_trackbar, window_name, 0, max_lowThreshold, CannyThreshold)
 
 while True:
     isTrue, frame = capture.read()
-    
+
+    # Convert frame to HSV
     hsv = cv.cvtColor(frame, cv.COLOR_BGR2HSV)
     
-    blueMask = cv.inRange(hsv, lower_blue, upper_blue) 
+    # Apply yellow mask
+    yellowMask = cv.inRange(hsv, lowerYellow, upperYellow)
+    yellowResult = cv.bitwise_and(frame, frame, mask=yellowMask)
 
-    blueResult = cv.bitwise_and(frame, frame, mask = blueMask) 
+    # Apply blue mask
+    blueMask = cv.inRange(hsv, lower_blue, upper_blue)
+    blueResult = cv.bitwise_and(frame, frame, mask=blueMask)
     
-    yellowMask = cv.inRange(hsv, lowerYellow, upperYellow) 
+    finalResult = yellowResult + blueResult
 
-    cv.imshow('Yellow Mask', yellowMask)
+    # Display results
+    cv.imshow('Blue Result', blueResult)
+    cv.imshow('Yellow Result', yellowResult)
+    cv.imshow('Final Result', finalResult)
 
-    yellowResult = cv.bitwise_and(frame, frame, mask = blueMask) 
+    cv.namedWindow('Final Result', cv.WINDOW_AUTOSIZE)
 
-    cv.imshow('Result', yellowResult)
-    cv.imshow('Result', blueResult)
 
-    low_threshold = cv.getTrackbarPos(title_trackbar, window_name)
-    CannyThreshold(low_threshold)
-    
     if cv.waitKey(20) & 0xFF == ord('d'):
         break
+
+# Release capture and destroy windows
+capture.release()
+cv.destroyAllWindows()
