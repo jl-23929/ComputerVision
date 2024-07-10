@@ -19,5 +19,10 @@ while True:
     dilated = cv.dilate(canny, (3,3), iterations=5)
     cv.imshow('Dilated', dilated)
 
+    cropped = frame[50:200, 200:400]
+
+    flip = cv.flip(frame, 1)
+    cv.imshow('Flip', flip)
+
     if cv.waitKey(20) & 0xFF == ord('d'):
         break   
