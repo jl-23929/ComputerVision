@@ -31,9 +31,8 @@ def draw_lines(img, lines, color=[255, 255, 255], thickness=3):
     for line in lines:
         for x1, y1, x2, y2 in line:
             cv.line(line_img, (x1, y1), (x2, y2), color, thickness)
-    # Merge the image with the lines onto the original.
 
-    return img
+    return line_img
 
 while True: 
     isTrue, frame = capture.read()
@@ -69,7 +68,7 @@ while True:
     print(blueLines)
 
     yellowLines = cv.HoughLinesP(
-    blueMask,
+    yellowMask,
     rho=6,
     theta=np.pi / 60,
     threshold=160,
@@ -79,15 +78,15 @@ while True:
 
     print(yellowLines)
 
-    blueLineImage = draw_lines(frame, blueLines)
+    blueLineImage = draw_lines(resizedFrame, blueLines)
     cv.imshow('Blue Lines', blueLineImage)
 
-    yellowLineImage = draw_lines(frame, yellowLines)
+    yellowLineImage = draw_lines(resizedFrame, yellowLines)
     cv.imshow('Yellow Lines', yellowLineImage)
 
     finalLines = blueLineImage + yellowLineImage
 
-    final = cv.addWeighted(frame, 0.8, finalLines, 1.0, 0.0)
+    final = cv.addWeighted(resizedFrame, 0.8, finalLines, 1.0, 0.0)
 
     cv.imshow('Final', final)    
 
