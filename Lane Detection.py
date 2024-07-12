@@ -1,6 +1,7 @@
 from __future__ import print_function
 import cv2 as cv
 import numpy as np
+import math
 
 # Define HSV ranges for blue and yellow
 lower_blue = np.array([60, 35, 140])
@@ -10,7 +11,7 @@ lowerYellow = np.array([30, 40, 40])
 upperYellow = np.array([60, 255, 255])
 
 # Open video capture
-capture = cv.VideoCapture(r"C:\Users\james680384\Documents\GitHub\ComputerVision\IMG_0625.mov")
+capture = cv.VideoCapture(r"C:\Users\james\OneDrive\Documents\GitHub\ComputerVision\IMG_0625.MP4")
 
 def draw_lines(img, lines, color=[255, 255, 255], thickness=3):
     # If there are no lines to draw, exit.
@@ -29,6 +30,7 @@ def draw_lines(img, lines, color=[255, 255, 255], thickness=3):
     )
     # Loop over all lines and draw them on the blank image.
     for line in lines:
+
         for x1, y1, x2, y2 in line:
             cv.line(line_img, (x1, y1), (x2, y2), color, thickness)
 
@@ -65,7 +67,6 @@ while True:
     minLineLength=40,
     maxLineGap=25
     )
-    print(blueLines)
 
     yellowLines = cv.HoughLinesP(
     yellowMask,
@@ -76,17 +77,28 @@ while True:
     minLineLength=40,
     maxLineGap=25)
 
-    print(yellowLines)
-
     blueLineImage = draw_lines(resizedFrame, blueLines)
     cv.imshow('Blue Lines', blueLineImage)
 
     yellowLineImage = draw_lines(resizedFrame, yellowLines)
     cv.imshow('Yellow Lines', yellowLineImage)
 
-    finalLines = blueLineImage + yellowLineImage
+    finalLines = []
+    
+    finalLines.append(blueLines)
+    finalLines.append(yellowLines)
 
-    final = cv.addWeighted(resizedFrame, 0.8, finalLines, 1.0, 0.0)
+    finalLineImage = blueLineImage + yellowLineImage
+    
+    polygonPoints = []
+
+    for segment in finalLines:
+        polygonPoints.append(segment[0])
+
+
+    print(polygonPoints)
+
+    final = cv.addWeighted(resizedFrame, 0.8, finalLineImage, 1.0, 0.0)
 
     cv.imshow('Final', final)    
 
