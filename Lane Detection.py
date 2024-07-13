@@ -58,49 +58,52 @@ while True:
     cv.imshow('Blue Result', blueResult)
     cv.imshow('Yellow Result', yellowResult)
 
-    blueLines = cv.HoughLinesP(
-    blueMask,
-    rho=6,
-    theta=np.pi / 60,
-    threshold=160,
-    lines=np.array([]),
-    minLineLength=40,
-    maxLineGap=25
-    )
+    blueLines = cv.Canny(blueMask, 50, 150, apertureSize=3)
 
-    yellowLines = cv.HoughLinesP(
-    yellowMask,
-    rho=6,
-    theta=np.pi / 60,
-    threshold=160,
-    lines=np.array([]),
-    minLineLength=40,
-    maxLineGap=25)
+    yellowLines = cv.Canny(yellowMask, 50, 150, apertureSize=3)
 
-    blueLineImage = draw_lines(resizedFrame, blueLines)
-    cv.imshow('Blue Lines', blueLineImage)
-
-    yellowLineImage = draw_lines(resizedFrame, yellowLines)
-    cv.imshow('Yellow Lines', yellowLineImage)
-
-    finalLines = []
+    finalLineImage = blueLines + yellowLines
     
-    finalLines.append(blueLines)
-    finalLines.append(yellowLines)
+    lines = cv.HoughLinesP(finalLineImage, 5, np.pi/180, 50, maxLineGap=50)
 
-    finalLineImage = blueLineImage + yellowLineImage
+    line_image = draw_lines(resizedFrame, lines)
+
+    cv.imshow('Line Image', line_image)
+
+    print(lines)
+
+
+    raycastingPoint = (320, 480)
+
+    maxDistance = 0
+
+    longestEndpoint = None
+
+    if lines is not None:
+
+        for line in lines:
+            x1, y1, x2, y2 = line[0]
+
+            intersectionY = y2
+
+            intersectionX = x2
+
+            distance = math.sqrt((intersectionX - raycastingPoint[0]) ** 2 + (intersectionY - raycastingPoint[1]) ** 2)
+
+            gradient = (y2 - y1) / (x2 - x1)
+
+            intercept = y1 - gradient * x1
+
+            
+
+            if distance > maxDistance:
+                maxDistance = distance
+                longestEndpoint = (intersectionX, intersectionY)
     
-    polygonPoints = []
+    if longestEndpoint is not None:
+        cv.line(line_image, raycastingPoint, longestEndpoint, (0, 255, 0), 3)
 
-    for segment in finalLines:
-        polygonPoints.append(segment[0])
-
-
-    print(polygonPoints)
-
-    final = cv.addWeighted(resizedFrame, 0.8, finalLineImage, 1.0, 0.0)
-
-    cv.imshow('Final', final)    
+    cv.imshow('Final', line_image)    
 
     if cv.waitKey(20) & 0xFF == ord('d'):
         break
